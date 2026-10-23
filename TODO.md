@@ -65,6 +65,9 @@ up to date at the end of every milestone.
 - **M3**: `alarm_triggered` is held back 30 s only for repeats of one alarm:
   once the area shows no alarm, the next one is announced at once.
 - **M4**: ElkRP is checked again right before an output command is written.
+- **M5 (review 2)**: an arm that waits for a disarm of its area to apply
+  frees the arm line first: the arms of the other areas never wait for it
+  (an arm of the same area reads the same doubt and waits on its own).
 
 ## To check on a real panel
 

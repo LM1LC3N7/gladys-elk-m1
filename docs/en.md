@@ -114,7 +114,8 @@ it works).
   arm's deadline (the area stays armed, stronger). Several arms (a scene
   arming every area, a double press) are written one after the other,
   without waiting for each other's confirmation; an arm asked just after a
-  disarm waits for the disarm to apply, then goes.
+  disarm of its area waits for that disarm to apply, then goes; that wait
+  never delays the arms of the other areas.
 - **Disarming and the outputs are off by default**, each behind its own
   option, read again right before the command is written. An output may
   drive a siren, a door strike or a gate: check what each one does first.

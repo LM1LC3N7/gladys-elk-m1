@@ -1054,6 +1054,9 @@ export class ElkApp {
         // Still armed stronger: the disarm may apply any moment. Its outcome
         // is awaited (within this arm's own deadline), then the arm goes: in
         // doubt the protective command leaves, never lowering anything.
+        // The arms of the other areas never wait for this: the arm line is
+        // freed first (an arm of this area reads the same doubt and waits too).
+        release();
         const seq = this.seq.AS;
         const disarmed = await this.confirm(
           asked,

@@ -10,6 +10,11 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+### Fixed
+
+- An arm waiting for a disarm of its area to apply no longer delays the
+  arms of the other areas (review 2).
+
 ## [0.1.1] - 2026-10-23
 
 ### Added

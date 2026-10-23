@@ -373,3 +373,35 @@ test('R11: ElkRP connected, link cut before RP 00: commands after the reconnecti
   assert.equal(ack.success, true, ack.error);
   assert.equal(ctx.app.model.rp, 0, 'ElkRP never outlives its session');
 });
+
+test('M5 (review 2): an arm waiting for a disarm never delays the arm of another area', async (t) => {
+  const ctx = await setup(t, {
+    config: { allow_disarm: true },
+    prepare: (p) => {
+      p.armed[0] = '1';
+      p.armUp[0] = '4';
+    },
+  });
+  await synced(ctx);
+  // The disarm of area 1 is taken, never applied.
+  ctx.panel.hold = (code) => code === 'a0';
+  const disarm = ctx.press('area', 1, 'disarm');
+  await until(() => ctx.panel.commands.some((c) => c.code === 'a0'));
+  const asked = Date.now();
+  const stay1 = ctx.press('area', 1, 'arm-stay');
+  await sleep(100);
+  const stay2 = ctx.press('area', 2, 'arm-stay');
+  const a2 = await stay2;
+  assert.equal(a2.success, true, a2.error);
+  const written = ctx.panel.commands.find((c) => c.line.slice(2, 5) === 'a22');
+  assert.ok(written, 'area 2 armed');
+  assert.ok(written.at - asked < 1_500, `area 2 written at ${written.at - asked} ms`);
+  const a1 = await stay1;
+  assert.match(a1.error, /state is uncertain/);
+  assert.equal(
+    ctx.panel.commands.filter((c) => c.line.slice(2, 5) === 'a21').length,
+    0,
+    'area 1 still armed away: never lowered',
+  );
+  await disarm;
+});

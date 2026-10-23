@@ -122,7 +122,9 @@ configuration, ou appuyez sur **Tester la connexion** pour un nouvel essai
   l'armement (le secteur reste armé, plus fort). Plusieurs armements (une
   scène qui arme tous les secteurs, un double appui) sont écrits l'un après
   l'autre, sans attendre la confirmation du précédent ; un armement demandé
-  juste après un désarmement attend que celui-ci s'applique, puis part.
+  juste après un désarmement de son secteur attend que celui-ci s'applique,
+  puis part ; cette attente ne retarde jamais les armements des autres
+  secteurs.
 - **Le désarmement et les sorties sont désactivés par défaut**, chacun
   derrière son option, relue juste avant l'écriture de la commande. Une
   sortie peut commander une sirène, une gâche ou un portail : vérifiez
