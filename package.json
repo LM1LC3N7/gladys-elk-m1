@@ -1,6 +1,6 @@
 {
   "name": "gladys-elk-m1",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Gladys Assistant external integration for ELK M1 Gold and M1 EZ8 alarm panels, locally over TCP or TLS through the M1XEP Ethernet module. Unofficial, not affiliated with ELK Products.",
   "type": "module",

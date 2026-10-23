@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-23
+
 ### Added
 
 - Local connection to ELK M1 Gold and M1 EZ8 panels through the M1XEP
@@ -77,4 +79,5 @@ the notes of the version's GitHub Release.
   the docs say TLS 1.0 is weaker and list every case where an arm is
   refused.
 
-[Unreleased]: https://github.com/LM1LC3N7/gladys-elk-m1/commits/main
+[Unreleased]: https://github.com/LM1LC3N7/gladys-elk-m1/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/LM1LC3N7/gladys-elk-m1/releases/tag/v0.1.1
