@@ -57,4 +57,24 @@ the notes of the version's GitHub Release.
   malformed lines cut the link; no control byte in the files (test); the
   user code and the password never logged.
 
+### Fixed
+
+- An arm never waits for the confirmation of an earlier arm (another area,
+  a double press, a scene arming every area): only for its write, each
+  against its own deadline (review 1).
+- An arm stay or night asked right after a disarm that has not applied yet
+  waits for it, then goes (never lowering the protection), instead of being
+  refused.
+- A lost "ElkRP disconnected" report no longer blocks the commands after a
+  reconnection.
+- A new alarm of the same kind after the first one ended is announced, even
+  within 30 s.
+- ElkRP is checked again right before an output command is written.
+
+### Changed
+
+- The old ciphers and the legacy renegotiation are used for TLS 1.0 only;
+  the docs say TLS 1.0 is weaker and list every case where an arm is
+  refused.
+
 [Unreleased]: https://github.com/LM1LC3N7/gladys-elk-m1/commits/main

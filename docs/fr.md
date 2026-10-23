@@ -42,7 +42,9 @@ Les noms des secteurs, zones, sorties et thermostats viennent de la centrale
 2. Choisissez la connexion :
    - **Sécurisée, TLS 1.2** (port 2601) : micrologiciel du M1XEP 2.0.46 et
      suivants ;
-   - **Sécurisée, TLS 1.0** (port 2601) : micrologiciels plus anciens ;
+   - **Sécurisée, TLS 1.0** (port 2601) : anciens micrologiciels seulement.
+     TLS 1.0 avec d'anciens algorithmes est **plus faible** : ne le choisissez
+     que si TLS 1.2 échoue ;
    - **Non sécurisée** (port 2101) : seulement si elle est activée sur votre
      M1XEP. Tout, y compris le code utilisateur, circule alors en clair sur
      votre réseau.
@@ -108,8 +110,19 @@ configuration, ou appuyez sur **Tester la connexion** pour un nouvel essai
   alarme, les sirènes et un appel de votre télésurveillance. Un armement ne
   baisse jamais la protection (un armement partiel sur un secteur armé total
   n'envoie rien) ; un secteur armé dans un autre mode doit d'abord être
-  désarmé (la centrale n'arme qu'un secteur désarmé) ; un secteur pas prêt à
-  armer (une zone ouverte) n'est pas armé.
+  désarmé (la centrale n'arme qu'un secteur désarmé). L'armement est
+  toutefois refusé, rien n'étant envoyé, dans ces cas : pas de code
+  utilisateur, ou un code déjà refusé par la centrale ; un secteur pas prêt
+  à armer (une zone ouverte) ; ElkRP connecté à la centrale ; l'intégration
+  arrêtée sur un autre certificat ou une connexion refusée ; la centrale
+  injoignable même après une tentative de connexion immédiate ; un armement
+  partiel ou nuit dont l'état ne peut pas être relu alors que le dernier état
+  connu est déjà aussi fort (un armement total part alors quand même) ; un
+  désarmement envoyé juste avant et toujours pas appliqué à l'échéance de
+  l'armement (le secteur reste armé, plus fort). Plusieurs armements (une
+  scène qui arme tous les secteurs, un double appui) sont écrits l'un après
+  l'autre, sans attendre la confirmation du précédent ; un armement demandé
+  juste après un désarmement attend que celui-ci s'applique, puis part.
 - **Le désarmement et les sorties sont désactivés par défaut**, chacun
   derrière son option, relue juste avant l'écriture de la commande. Une
   sortie peut commander une sirène, une gâche ou un portail : vérifiez

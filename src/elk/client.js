@@ -60,7 +60,8 @@ export class ElkError extends Error {
 /** The socket of a connection: plain TCP, or TLS with the M1XEP's old versions and ciphers. */
 export function defaultConnect({ host, port, tls }) {
   if (!tls) return createConnection({ host, port });
-  const version = tls === 'tls10' ? 'TLSv1' : 'TLSv1.2';
+  const legacy = tls === 'tls10';
+  const version = legacy ? 'TLSv1' : 'TLSv1.2';
   return tlsConnect({
     host,
     port,
@@ -68,12 +69,18 @@ export function defaultConnect({ host, port, tls }) {
     // The M1XEP has a self-signed certificate: no authority vouches for it.
     // Its fingerprint is checked against the pin before anything is written.
     rejectUnauthorized: false,
-    // elkm1-lib util.py: the M1XEP negotiates one version only, with old
-    // ciphers and the legacy renegotiation.
+    // elkm1-lib util.py: the M1XEP negotiates one version only.
     minVersion: version,
     maxVersion: version,
-    ciphers: 'DEFAULT:@SECLEVEL=0',
-    secureOptions: cryptoConstants.SSL_OP_LEGACY_SERVER_CONNECT,
+    // The old ciphers and the legacy renegotiation (weaker) only for the TLS
+    // 1.0 of old M1XEP firmwares; TLS 1.2 keeps Node's defaults (to confirm
+    // on a real M1XEP, TODO.md).
+    ...(legacy
+      ? {
+          ciphers: 'DEFAULT:@SECLEVEL=0',
+          secureOptions: cryptoConstants.SSL_OP_LEGACY_SERVER_CONNECT,
+        }
+      : {}),
   });
 }
 

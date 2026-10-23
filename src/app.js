@@ -124,7 +124,12 @@ export class ElkApp {
     // Every report is applied to the model when the client emits it, in
     // order; guard() only queues what talks to Gladys, and drops it when a
     // new session started meanwhile.
-    this.client.on('attempt', ({ at }) => this.noteAttempt(at));
+    this.client.on('attempt', ({ at }) => {
+      // ElkRP belongs to a session: its end (RP 00) may have been lost with
+      // the old one, so a new connection never inherits it.
+      this.model.rp = 0;
+      this.noteAttempt(at);
+    });
     this.client.on('pin', ({ fingerprint }) => this.learnPin(fingerprint));
     this.client.on('up', ({ version }) => {
       this.model.version = version;
@@ -592,6 +597,13 @@ export class ElkApp {
       const now = { arming: settled(status), alarm: status.alarm };
       events.push(...this.transitions(n, this.seen.get(n), now));
       this.seen.set(n, now);
+      if (!status.alarm) {
+        // The alarm of this area is over: the next one is news, even within
+        // 30 s (only the repeats of one alarm are held back).
+        for (const key of [...this.alarmsSent.keys()]) {
+          if (key.startsWith(`${n}:`)) this.alarmsSent.delete(key);
+        }
+      }
     }
     await this.publishStates();
     if (events.some((event) => event.type === 'alarm')) {
@@ -985,17 +997,28 @@ export class ElkApp {
       return Promise.reject(err);
     }
     this.withdrawDisarms(n);
-    const run = this.arms.then(
-      () => this.armNow(n, mode, asked),
-      () => this.armNow(n, mode, asked),
-    );
-    this.arms = run.catch(() => undefined);
+    // The arms go one after the other up to their WRITE only: the next one
+    // never waits for the confirmation of the previous one (a slow or silent
+    // panel never delays it), and each is checked against its own deadline.
+    let release;
+    const written = new Promise((resolve) => {
+      release = resolve;
+    });
+    const previous = this.arms;
+    this.arms = previous.then(() => written);
+    const run = previous.then(() => this.armNow(n, mode, asked, release));
+    run.then(release, release);
     return run;
   }
 
-  async armNow(n, mode, asked) {
+  async armNow(n, mode, asked, release = () => undefined) {
     const label = word(fill(COMMAND_NAMES[mode], n), 'en');
     const level = PROTECTION[mode];
+    if (this.now() >= asked + TIMINGS.sendBy) {
+      // Other arms took all its time before its turn: never "the panel was slow".
+      this.logger.warn(`Arm REFUSED (${label}): its time ran out behind other arms`);
+      throw this.refused(T.commandBusy);
+    }
     this.checkCode(label);
     this.checkProgramming(label);
     const session = this.session;
@@ -1028,10 +1051,27 @@ export class ElkApp {
       // A disarm left lately with no known outcome: the state read may come
       // before its effect. Never "nothing sent" on it.
       if (status.armed && status.level > level) {
-        this.logger.warn(`Arm (${label}): a disarm may still apply, state uncertain`);
-        this.scheduleReadBack();
-        throw this.error(T.uncertainAfterDisarm);
+        // Still armed stronger: the disarm may apply any moment. Its outcome
+        // is awaited (within this arm's own deadline), then the arm goes: in
+        // doubt the protective command leaves, never lowering anything.
+        const seq = this.seq.AS;
+        const disarmed = await this.confirm(
+          asked,
+          session,
+          true,
+          () => this.seq.AS > seq && this.shows(n, 'disarmed'),
+          undefined,
+          asked + TIMINGS.sendBy - 300,
+        );
+        if (session !== this.session) throw this.refused(T.restarted);
+        if (!disarmed) {
+          this.logger.warn(`Arm (${label}): a disarm may still apply, state uncertain`);
+          this.scheduleReadBack();
+          throw this.error(T.uncertainAfterDisarm);
+        }
+        this.logger.info(`Arm (${label}): the disarm just applied, arming now`);
       }
+      // Never "nothing sent" (nor "not ready") on a state the disarm may change.
       status = undefined;
     }
     if (status?.armed) {
@@ -1049,7 +1089,7 @@ export class ElkApp {
     }
     this.checkCode(label);
     this.logger.info(`ARMING from Gladys: ${label}`);
-    await this.send(n, mode, asked, { protective: true });
+    await this.send(n, mode, asked, { protective: true, onWritten: release });
   }
 
   /**
@@ -1167,7 +1207,7 @@ export class ElkApp {
    * Resolves when it does; throws Refused when nothing was sent, an Error
    * otherwise ("sent, without confirmation" or "code refused").
    */
-  async send(n, mode, asked, { protective = false, kind, ticket } = {}) {
+  async send(n, mode, asked, { protective = false, kind, ticket, onWritten } = {}) {
     const what = fill(COMMAND_NAMES[mode], n);
     const label = word(what, 'en');
     const name = word(what, this.language);
@@ -1220,6 +1260,7 @@ export class ElkApp {
         },
       });
     } catch (err) {
+      onWritten?.();
       if (err instanceof ElkError && !err.sent) {
         this.logger.warn(`Command NOT sent (${label}): ${err.message}`);
         if (covered) throw this.refused(T.armCovered);
@@ -1234,6 +1275,8 @@ export class ElkApp {
       }
       throw unconfirmed(err.message, err);
     }
+    // Written: the next arm may go now, while this one is confirmed.
+    onWritten?.();
     this.commanded.set(n, { mode, until: this.now() + TIMINGS.commandMemory });
     const confirmed = await this.confirm(asked, session, protective, () =>
       this.seq.AS > seq ? this.shows(n, mode) : false,
@@ -1261,8 +1304,8 @@ export class ElkApp {
     protective,
     shown,
     read = (options) => this.client.readArming(options),
+    answerBy = asked + TIMINGS.answerBy,
   ) {
-    const answerBy = asked + TIMINGS.answerBy;
     const stoppedBefore = this.codeStopped();
     while (answerBy - this.now() > 150) {
       if (session !== this.session || (this.codeStopped() && !stoppedBefore)) return false;
@@ -1343,12 +1386,16 @@ export class ElkApp {
           check: () =>
             session === this.session &&
             this.now() <= asked + TIMINGS.sendBy &&
-            this.config.allowOutputs,
+            this.config.allowOutputs &&
+            !this.model.rp,
         });
       } catch (err) {
         if (err instanceof ElkError && !err.sent) {
           this.logger.warn(`Command NOT sent (${label}): ${err.message}`);
-          if (err.kind === 'withdrawn') this.checkOutputsAllowed();
+          if (err.kind === 'withdrawn') {
+            this.checkOutputsAllowed();
+            this.checkProgramming(label);
+          }
           throw this.refused(
             err.kind === 'lost' ? T.linkCut : err.kind === 'offline' ? T.offline : T.tooLate,
           );

@@ -39,7 +39,8 @@ The names of the areas, zones, outputs and thermostats come from the panel
    your router).
 2. Choose the connection:
    - **Secure, TLS 1.2** (port 2601): M1XEP firmware 2.0.46 and later;
-   - **Secure, TLS 1.0** (port 2601): older M1XEP firmwares;
+   - **Secure, TLS 1.0** (port 2601): older M1XEP firmwares only. TLS 1.0
+     with old ciphers is **weaker**: choose it only if TLS 1.2 fails;
    - **Non-secure** (port 2101): only if it is enabled on your M1XEP.
      Everything, the user code included, then travels in clear text on your
      network.
@@ -102,8 +103,18 @@ it works).
   (a scene, a mistake) may raise a false alarm, the sirens and a call of
   your alarm monitoring company. An arming never lowers the protection
   (arm stay on an area armed away sends nothing); an area armed in another
-  mode must be disarmed first (the panel arms a disarmed area only); an area
-  not ready to arm (a zone open) is not armed.
+  mode must be disarmed first (the panel arms a disarmed area only).
+  Arming is still refused, nothing sent, in these cases: no user code, or a
+  code the panel refused before; an area not ready to arm (a zone open);
+  ElkRP connected to the panel; the integration stopped on another
+  certificate or a refused login; the panel unreachable even after one
+  immediate connection attempt; an arm stay or night whose state cannot be
+  read when the last state known is already as strong (an arm away is then
+  sent anyway); a disarm sent just before that has still not applied by the
+  arm's deadline (the area stays armed, stronger). Several arms (a scene
+  arming every area, a double press) are written one after the other,
+  without waiting for each other's confirmation; an arm asked just after a
+  disarm waits for the disarm to apply, then goes.
 - **Disarming and the outputs are off by default**, each behind its own
   option, read again right before the command is written. An output may
   drive a siren, a door strike or a gate: check what each one does first.

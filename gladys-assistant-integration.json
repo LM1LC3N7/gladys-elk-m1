@@ -66,8 +66,8 @@
         "fr": "Connexion"
       },
       "description": {
-        "en": "The secure port of the M1XEP (2601) with TLS 1.2 (firmware 2.0.46 and later) or TLS 1.0 (older firmwares), with a user name and a password; or the non-secure port (2101), where everything, the user code included, travels in clear text on your network.",
-        "fr": "Le port sécurisé du M1XEP (2601) en TLS 1.2 (micrologiciel 2.0.46 et suivants) ou TLS 1.0 (micrologiciels plus anciens), avec un nom d'utilisateur et un mot de passe ; ou le port non sécurisé (2101), où tout, y compris le code utilisateur, circule en clair sur votre réseau."
+        "en": "The secure port of the M1XEP (2601) with TLS 1.2 (firmware 2.0.46 and later) or TLS 1.0 with old ciphers (older firmwares only: weaker, choose it only if TLS 1.2 fails), with a user name and a password; or the non-secure port (2101), where everything, the user code included, travels in clear text on your network.",
+        "fr": "Le port sécurisé du M1XEP (2601) en TLS 1.2 (micrologiciel 2.0.46 et suivants) ou TLS 1.0 avec d'anciens algorithmes (anciens micrologiciels seulement : plus faible, à choisir seulement si TLS 1.2 échoue), avec un nom d'utilisateur et un mot de passe ; ou le port non sécurisé (2101), où tout, y compris le code utilisateur, circule en clair sur votre réseau."
       },
       "required": false,
       "default": "tls12",
@@ -82,8 +82,8 @@
         {
           "value": "tls10",
           "label": {
-            "en": "Secure, TLS 1.0 (port 2601, older M1XEP)",
-            "fr": "Sécurisée, TLS 1.0 (port 2601, ancien M1XEP)"
+            "en": "Secure, TLS 1.0, weaker (port 2601, older M1XEP)",
+            "fr": "Sécurisée, TLS 1.0, plus faible (port 2601, ancien M1XEP)"
           }
         },
         {

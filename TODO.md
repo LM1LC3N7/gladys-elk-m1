@@ -28,6 +28,9 @@ up to date at the end of every milestone.
       connection", "Allow a new try of the code", "Trust the new
       certificate"; fr/en. Tested against an in-memory panel and a real
       loopback TLS server only (framing checked against elkm1-lib's vectors).
+- [x] **Review 1 fixes** (2026-10-23, xhigh review of f7b341d: 1 blocking,
+      2 important, 4 minor): see "Decisions after review 1" below; the
+      hostile scenarios of the review are kept in `test/review1.test.js`.
 - [ ] **Milestone 2 - real panel**: run against a real M1 with an M1XEP
       (TLS 1.2, TLS 1.0, non-secure); capture real lines (anonymised, never a
       code) as fixtures; fix what differs (see below).
@@ -37,6 +40,31 @@ up to date at the end of every milestone.
       behind an option, alarm memory (AM), the event log (LD), lights.
 - [ ] **Milestone 4 - first release**: Docker image check, Release workflow,
       topic, GHCR package public.
+
+## Decisions after review 1
+
+- **B1**: the arms go one after the other up to their write only; the next
+  one never waits for the confirmation of the previous one (another area, a
+  double press, a scene arming every area); each is checked against its own
+  deadline; their confirmations run in parallel. An arm whose time ran out
+  behind other arms says so ("other commands took all the time"), never
+  "the panel answered too slowly".
+- **I1**: an arm asked while a disarm of its area was written less than
+  4.5 s ago and the area still reads stronger waits for the disarm to apply
+  (within its own deadline, until 3.2 s after the request), then goes; if
+  the area is still armed stronger at that point, nothing is sent (it stays
+  armed, never lowered) and the answer says the state is uncertain.
+- **I2**: ElkRP (`RP`) belongs to a session: reset at every connection
+  attempt, so a lost `RP 00` never blocks the commands nor the periodic
+  reads.
+- **M1**: the old ciphers (`@SECLEVEL=0`) and the legacy renegotiation only
+  for TLS 1.0; TLS 1.2 keeps Node's defaults (to confirm on a real M1XEP:
+  if its TLS 1.2 handshake fails, they may be needed there too). Docs and
+  manifest: TLS 1.0 is weaker, only if TLS 1.2 fails.
+- **M2**: the docs list every case where an arm is refused.
+- **M3**: `alarm_triggered` is held back 30 s only for repeats of one alarm:
+  once the area shows no alarm, the next one is announced at once.
+- **M4**: ElkRP is checked again right before an output command is written.
 
 ## To check on a real panel
 
