@@ -1,177 +1,617 @@
 {
   "manifest_version": 1,
   "type": "device",
-  "name": "Demo Devices Template",
+  "name": "ELK M1",
   "description": {
-    "en": "Starter template showing sensors, a switch, a dimmable light and a smart plug.",
-    "fr": "Template de démarrage : capteurs, interrupteur, lampe variable et prise connectée."
+    "en": "ELK M1 Gold and EZ8 alarm panels, locally through the M1XEP module.",
+    "fr": "Centrales d'alarme ELK M1 Gold et EZ8, en local par le module M1XEP."
   },
-  "version": "1.0.0",
-  "docker_image": "ghcr.io/gladysassistant/integration-template-js:1.0.0",
+  "version": "0.1.0",
+  "docker_image": "ghcr.io/lm1lc3n7/gladys-elk-m1:0.1.0",
   "gladys_version": ">=5.1.0",
-  "cover_image": "https://raw.githubusercontent.com/GladysAssistant/integration-template-js/master/cover.png",
-  "categories": ["lighting", "security", "environment"],
-  "transports": ["local", "cloud"],
+  "cover_image": "https://raw.githubusercontent.com/LM1LC3N7/gladys-elk-m1/main/cover.png",
+  "categories": ["security"],
+  "transports": ["local"],
   "config_schema": [
     {
       "key": "intro",
       "type": "section",
-      "label": { "en": "Getting started", "fr": "Pour commencer" },
+      "label": {
+        "en": "Your ELK M1 panel",
+        "fr": "Votre centrale ELK M1"
+      },
       "description": {
-        "en": "The demo weather station reads real data from the free Open-Meteo API: pick the coordinates to observe. No account, no API key.",
-        "fr": "La station météo de démonstration lit de vraies données via l'API gratuite Open-Meteo : choisissez les coordonnées à observer. Pas de compte, pas de clé d'API."
+        "en": "For ELK M1 Gold and M1 EZ8 alarm panels with their M1XEP Ethernet module, on your network, without any cloud: the state of each area (disarmed, arming, armed away, stay, night or vacation, entry delay, alarm, fire alarm, ready), the zones, outputs and thermostats you list, the troubles of the panel, arm and disarm buttons, output buttons, scene triggers. The serial port is not supported. The protocol is the ASCII protocol published by ELK, through the open-source elkm1-lib library. Never tested with a real panel. Unofficial, not affiliated with ELK Products.",
+        "fr": "Pour les centrales d'alarme ELK M1 Gold et M1 EZ8 avec leur module Ethernet M1XEP, sur votre réseau, sans cloud : l'état de chaque secteur (désarmé, armement en cours, armé total, partiel, nuit ou vacances, délai d'entrée, alarme, alarme incendie, prêt), les zones, sorties et thermostats que vous indiquez, les défauts de la centrale, des boutons d'armement et de désarmement, des boutons de sortie, des déclencheurs de scène. Le port série n'est pas pris en charge. Le protocole est le protocole ASCII publié par ELK, par la bibliothèque libre elkm1-lib. Jamais testé avec une vraie centrale. Non officiel, sans lien avec ELK Products."
       },
       "links": [
         {
-          "url": "https://open-meteo.com/en/docs",
-          "label": { "en": "Open-Meteo documentation", "fr": "Documentation Open-Meteo" }
+          "url": "https://github.com/LM1LC3N7/gladys-elk-m1/blob/main/docs/fr.md",
+          "label": {
+            "en": "Guide (French)",
+            "fr": "Guide (français)"
+          }
+        },
+        {
+          "url": "https://github.com/LM1LC3N7/gladys-elk-m1/blob/main/docs/en.md",
+          "label": {
+            "en": "Guide (English)",
+            "fr": "Guide (anglais)"
+          }
         }
       ]
     },
     {
-      "key": "latitude",
-      "type": "number",
-      "label": { "en": "Latitude", "fr": "Latitude" },
-      "description": {
-        "en": "Latitude used for the demo weather sensor.",
-        "fr": "Latitude utilisée par le capteur météo de démonstration."
+      "key": "host",
+      "type": "string",
+      "label": {
+        "en": "Address of the M1XEP",
+        "fr": "Adresse du M1XEP"
       },
-      "placeholder": { "en": "e.g. 48.8566", "fr": "ex. 48.8566" },
-      "required": true,
-      "default": 48.8566,
-      "min": -90,
-      "max": 90
+      "description": {
+        "en": "The IP address of the M1XEP Ethernet module of the panel (give it a fixed address in your router).",
+        "fr": "L'adresse IP du module Ethernet M1XEP de la centrale (donnez-lui une adresse fixe dans votre box)."
+      },
+      "placeholder": {
+        "en": "192.168.1.80",
+        "fr": "192.168.1.80"
+      },
+      "required": true
     },
     {
-      "key": "longitude",
-      "type": "number",
-      "label": { "en": "Longitude", "fr": "Longitude" },
-      "description": {
-        "en": "Longitude used for the demo weather sensor.",
-        "fr": "Longitude utilisée par le capteur météo de démonstration."
-      },
-      "placeholder": { "en": "e.g. 2.3522", "fr": "ex. 2.3522" },
-      "required": true,
-      "default": 2.3522,
-      "min": -180,
-      "max": 180
-    },
-    {
-      "key": "unit",
+      "key": "connection",
       "type": "select",
-      "label": { "en": "Temperature unit", "fr": "Unité de température" },
+      "label": {
+        "en": "Connection",
+        "fr": "Connexion"
+      },
+      "description": {
+        "en": "The secure port of the M1XEP (2601) with TLS 1.2 (firmware 2.0.46 and later) or TLS 1.0 (older firmwares), with a user name and a password; or the non-secure port (2101), where everything, the user code included, travels in clear text on your network.",
+        "fr": "Le port sécurisé du M1XEP (2601) en TLS 1.2 (micrologiciel 2.0.46 et suivants) ou TLS 1.0 (micrologiciels plus anciens), avec un nom d'utilisateur et un mot de passe ; ou le port non sécurisé (2101), où tout, y compris le code utilisateur, circule en clair sur votre réseau."
+      },
       "required": false,
-      "default": "celsius",
+      "default": "tls12",
       "options": [
-        { "value": "celsius", "label": { "en": "Celsius", "fr": "Celsius" } },
-        { "value": "fahrenheit", "label": { "en": "Fahrenheit", "fr": "Fahrenheit" } }
+        {
+          "value": "tls12",
+          "label": {
+            "en": "Secure, TLS 1.2 (port 2601)",
+            "fr": "Sécurisée, TLS 1.2 (port 2601)"
+          }
+        },
+        {
+          "value": "tls10",
+          "label": {
+            "en": "Secure, TLS 1.0 (port 2601, older M1XEP)",
+            "fr": "Sécurisée, TLS 1.0 (port 2601, ancien M1XEP)"
+          }
+        },
+        {
+          "value": "plain",
+          "label": {
+            "en": "Non-secure (port 2101)",
+            "fr": "Non sécurisée (port 2101)"
+          }
+        }
       ]
     },
     {
-      "key": "poll_frequency",
+      "key": "port",
       "type": "number",
-      "label": { "en": "Refresh interval (s)", "fr": "Intervalle de rafraîchissement (s)" },
+      "label": {
+        "en": "Port",
+        "fr": "Port"
+      },
       "description": {
-        "en": "How often sensors are polled, in seconds (one minute minimum).",
-        "fr": "Fréquence d'interrogation des capteurs, en secondes (une minute minimum)."
+        "en": "Leave empty for the default port of the connection (2601 secure, 2101 non-secure).",
+        "fr": "Laissez vide pour le port par défaut de la connexion (2601 sécurisée, 2101 non sécurisée)."
+      },
+      "placeholder": {
+        "en": "2601",
+        "fr": "2601"
       },
       "required": false,
-      "default": 300,
-      "min": 60,
-      "max": 3600
+      "min": 1,
+      "max": 65535
+    },
+    {
+      "key": "username",
+      "type": "string",
+      "label": {
+        "en": "User name of the M1XEP",
+        "fr": "Nom d'utilisateur du M1XEP"
+      },
+      "description": {
+        "en": "Secure port only: the user name set for the M1XEP in ElkRP.",
+        "fr": "Port sécurisé seulement : le nom d'utilisateur réglé pour le M1XEP dans ElkRP."
+      },
+      "required": false
+    },
+    {
+      "key": "password",
+      "type": "secret",
+      "label": {
+        "en": "Password of the M1XEP",
+        "fr": "Mot de passe du M1XEP"
+      },
+      "description": {
+        "en": "Secure port only. Sent only to the M1XEP, after its certificate was checked. Kept by Gladys in its database, never shown again, never in the logs. A refused password stops the integration until it is changed or \"Test the connection\" is pressed.",
+        "fr": "Port sécurisé seulement. Envoyé seulement au M1XEP, après vérification de son certificat. Gardé par Gladys dans sa base, jamais réaffiché, jamais dans les journaux. Un mot de passe refusé arrête l'intégration jusqu'à son changement ou un appui sur « Tester la connexion »."
+      },
+      "required": false
+    },
+    {
+      "key": "certificate_fingerprint",
+      "type": "string",
+      "label": {
+        "en": "Certificate fingerprint (optional)",
+        "fr": "Empreinte du certificat (facultatif)"
+      },
+      "description": {
+        "en": "Secure port only: the SHA-256 fingerprint of the M1XEP certificate. Empty: the certificate met at the first connection is kept, and another one later stops everything until you vouch for it.",
+        "fr": "Port sécurisé seulement : l'empreinte SHA-256 du certificat du M1XEP. Vide : le certificat rencontré à la première connexion est retenu, et un autre plus tard arrête tout jusqu'à votre validation."
+      },
+      "placeholder": {
+        "en": "AB:CD:…",
+        "fr": "AB:CD:…"
+      },
+      "required": false
+    },
+    {
+      "key": "user_code",
+      "type": "secret",
+      "label": {
+        "en": "User code",
+        "fr": "Code utilisateur"
+      },
+      "description": {
+        "en": "Optional: the code (4 to 6 digits) of a panel user, needed only for arming and disarming; the states need none. It is sent to the panel at each of these commands: protected by TLS on the secure port, in clear text on the non-secure one. A code refused by the panel is never sent again by itself (\"Allow a new try of the code\" button). Kept by Gladys in its database, never shown again, sent only to the panel, never in the logs.",
+        "fr": "Facultatif : le code (4 à 6 chiffres) d'un utilisateur de la centrale, nécessaire seulement à l'armement et au désarmement ; les états n'en ont pas besoin. Il est envoyé à la centrale à chacune de ces commandes : protégé par TLS sur le port sécurisé, en clair sur le port non sécurisé. Un code refusé par la centrale n'est jamais renvoyé de lui-même (bouton « Autoriser un nouvel essai du code »). Gardé par Gladys dans sa base, jamais réaffiché, envoyé seulement à la centrale, jamais dans les journaux."
+      },
+      "required": false
+    },
+    {
+      "key": "areas",
+      "type": "string",
+      "label": {
+        "en": "Areas",
+        "fr": "Secteurs"
+      },
+      "description": {
+        "en": "The areas to show (1 to 8), e.g. \"1\" or \"1-2\".",
+        "fr": "Les secteurs à afficher (1 à 8), par ex. « 1 » ou « 1-2 »."
+      },
+      "placeholder": {
+        "en": "1",
+        "fr": "1"
+      },
+      "required": false,
+      "default": "1"
+    },
+    {
+      "key": "zones",
+      "type": "string",
+      "label": {
+        "en": "Zones",
+        "fr": "Zones"
+      },
+      "description": {
+        "en": "The zones to show (1 to 208), with their kind if not an opening, e.g. \"1-6, 7:motion, 9:smoke, 10:leak, 12:temperature\" (opening, motion, smoke, leak; temperature for zones 1 to 16).",
+        "fr": "Les zones à afficher (1 à 208), avec leur type si ce n’est pas une ouverture, par ex. « 1-6, 7:motion, 9:smoke, 10:leak, 12:temperature » (opening ouverture, motion mouvement, smoke fumée, leak fuite ; temperature température pour les zones 1 à 16)."
+      },
+      "placeholder": {
+        "en": "1-6, 7:motion",
+        "fr": "1-6, 7:motion"
+      },
+      "required": false
+    },
+    {
+      "key": "outputs",
+      "type": "string",
+      "label": {
+        "en": "Outputs",
+        "fr": "Sorties"
+      },
+      "description": {
+        "en": "The outputs to show (1 to 208), e.g. \"3, 5-6\". Their state is shown; the on and off buttons act only if allowed below.",
+        "fr": "Les sorties à afficher (1 à 208), par ex. « 3, 5-6 ». Leur état est affiché ; les boutons d'activation et de désactivation n'agissent que si l'option ci-dessous l'autorise."
+      },
+      "required": false
+    },
+    {
+      "key": "thermostats",
+      "type": "string",
+      "label": {
+        "en": "Thermostats",
+        "fr": "Thermostats"
+      },
+      "description": {
+        "en": "The thermostats to show (1 to 16), read only: temperature, humidity, setpoints, mode.",
+        "fr": "Les thermostats à afficher (1 à 16), en lecture seule : température, humidité, consignes, mode."
+      },
+      "required": false
+    },
+    {
+      "key": "temperature_unit",
+      "type": "select",
+      "label": {
+        "en": "Temperature unit of the panel",
+        "fr": "Unité de température de la centrale"
+      },
+      "description": {
+        "en": "The unit the panel uses (set in ElkRP, Fahrenheit by default). Fixed for the devices once created.",
+        "fr": "L'unité utilisée par la centrale (réglée dans ElkRP, Fahrenheit par défaut). Figée pour les appareils une fois créés."
+      },
+      "required": false,
+      "default": "fahrenheit",
+      "options": [
+        {
+          "value": "fahrenheit",
+          "label": {
+            "en": "Fahrenheit",
+            "fr": "Fahrenheit"
+          }
+        },
+        {
+          "value": "celsius",
+          "label": {
+            "en": "Celsius",
+            "fr": "Celsius"
+          }
+        }
+      ]
+    },
+    {
+      "key": "safety",
+      "type": "section",
+      "label": {
+        "en": "Safety",
+        "fr": "Sécurité"
+      },
+      "description": {
+        "en": "Anyone who can control the devices in Gladys (dashboard, scenes, the Gladys app) can use the alarm through this integration, with the user code above. Arming is always allowed: arming while someone is inside (a scene, a mistake) may raise a false alarm, the sirens and a call of your alarm monitoring company. Disarming and the outputs are off by default, behind the options below: allow them only if your Gladys is well protected. Every command is written in the integration logs; the code never is.",
+        "fr": "Toute personne pouvant piloter les appareils dans Gladys (tableau de bord, scènes, application Gladys) peut agir sur l'alarme par cette intégration, avec le code utilisateur ci-dessus. L'armement est toujours permis : armer alors que quelqu'un est à l'intérieur (une scène, une erreur) peut déclencher une fausse alarme, les sirènes et un appel de votre télésurveillance. Le désarmement et les sorties sont désactivés par défaut, derrière les options ci-dessous : ne les autorisez que si votre Gladys est bien protégé. Chaque commande est écrite dans les journaux de l'intégration, jamais le code."
+      }
+    },
+    {
+      "key": "allow_disarm",
+      "type": "boolean",
+      "label": {
+        "en": "Allow disarming from Gladys",
+        "fr": "Autoriser le désarmement depuis Gladys"
+      },
+      "description": {
+        "en": "Once checked, every Gladys user, every scene and the Gladys mobile app can disarm with the user code of the configuration, without typing any code.",
+        "fr": "Une fois cochée, tout utilisateur de Gladys, toute scène et l'application mobile Gladys peuvent désarmer avec le code utilisateur de la configuration, sans saisir aucun code."
+      },
+      "required": false,
+      "default": false
+    },
+    {
+      "key": "allow_outputs",
+      "type": "boolean",
+      "label": {
+        "en": "Allow the output buttons",
+        "fr": "Autoriser les boutons des sorties"
+      },
+      "description": {
+        "en": "Once checked, the outputs listed above can be turned on and off from Gladys. An output may drive a siren, a door strike or a gate: check what each one does first.",
+        "fr": "Une fois cochée, les sorties indiquées ci-dessus peuvent être activées et désactivées depuis Gladys. Une sortie peut commander une sirène, une gâche ou un portail : vérifiez d'abord ce que fait chacune."
+      },
+      "required": false,
+      "default": false
+    },
+    {
+      "key": "language",
+      "type": "select",
+      "label": {
+        "en": "Language of the names",
+        "fr": "Langue des noms"
+      },
+      "description": {
+        "en": "Used for the names of the devices and features added from now on (unless the panel has its own), and for the states in text.",
+        "fr": "Sert aux noms des appareils et fonctionnalités ajoutés désormais (sauf si la centrale a les siens), et aux états en texte."
+      },
+      "required": false,
+      "default": "fr",
+      "options": [
+        {
+          "value": "fr",
+          "label": {
+            "en": "French",
+            "fr": "Français"
+          }
+        },
+        {
+          "value": "en",
+          "label": {
+            "en": "English",
+            "fr": "Anglais"
+          }
+        }
+      ]
     }
   ],
   "actions": [
     {
-      "key": "test_weather",
-      "label": { "en": "Test the weather provider", "fr": "Tester le fournisseur météo" },
-      "timeout_seconds": 30
+      "key": "test_connection",
+      "label": {
+        "en": "Test the connection",
+        "fr": "Tester la connexion"
+      },
+      "timeout_seconds": 15
     },
     {
-      "key": "identify",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "fields": [
-        {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
-        }
-      ]
+      "key": "allow_code_retry",
+      "label": {
+        "en": "Allow a new try of the code",
+        "fr": "Autoriser un nouvel essai du code"
+      },
+      "timeout_seconds": 10
+    },
+    {
+      "key": "trust_certificate",
+      "label": {
+        "en": "Trust the new certificate",
+        "fr": "Faire confiance au nouveau certificat"
+      },
+      "timeout_seconds": 15
     }
   ],
   "scene_triggers": [
     {
-      "key": "motion_detected",
-      "label": { "en": "Motion detected", "fr": "Mouvement détecté" },
+      "key": "alarm_triggered",
+      "label": {
+        "en": "ELK alarm triggered",
+        "fr": "Alarme ELK déclenchée"
+      },
       "description": {
-        "en": "A demo motion sensor saw a person or an animal move.",
-        "fr": "Un détecteur de démonstration a vu bouger une personne ou un animal."
+        "en": "An area goes into alarm: burglar, fire, medical, police, aux, carbon_monoxide, emergency, freeze, gas, heat, water or fire_supervisory.",
+        "fr": "Un secteur passe en alarme : intrusion (burglar), incendie (fire), médicale, police, auxiliaire, monoxyde de carbone, urgence, gel, gaz, chaleur, eau ou supervision incendie."
+      },
+      "variables": [
+        {
+          "key": "area",
+          "type": "number",
+          "label": {
+            "en": "Area",
+            "fr": "Secteur"
+          }
+        },
+        {
+          "key": "zone",
+          "type": "number",
+          "label": {
+            "en": "Zone in alarm",
+            "fr": "Zone en alarme"
+          }
+        },
+        {
+          "key": "kind",
+          "type": "string",
+          "label": {
+            "en": "Kind of alarm",
+            "fr": "Type d'alarme"
+          }
+        },
+        {
+          "key": "fire",
+          "type": "boolean",
+          "label": {
+            "en": "Fire alarm",
+            "fr": "Alarme incendie"
+          }
+        }
+      ]
+    },
+    {
+      "key": "armed",
+      "label": {
+        "en": "ELK area armed",
+        "fr": "Secteur ELK armé"
+      },
+      "description": {
+        "en": "An area was armed (from Gladys, a keypad, a key fob or another app), once the exit delay is over.",
+        "fr": "Un secteur a été armé (depuis Gladys, un clavier, une télécommande ou une autre application), une fois le délai de sortie écoulé."
       },
       "fields": [
         {
-          "key": "device",
+          "key": "mode",
           "type": "select",
-          "source": "devices",
-          "label": { "en": "Sensor", "fr": "Détecteur" }
-        },
-        {
-          "key": "target",
-          "type": "multi_select",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" },
+          "label": {
+            "en": "Mode",
+            "fr": "Mode"
+          },
           "options": [
-            { "value": "person", "label": { "en": "Person", "fr": "Personne" } },
-            { "value": "animal", "label": { "en": "Animal", "fr": "Animal" } }
+            {
+              "value": "armed_away",
+              "label": {
+                "en": "Armed away",
+                "fr": "Armé (total)"
+              }
+            },
+            {
+              "value": "armed_stay",
+              "label": {
+                "en": "Armed stay",
+                "fr": "Armé (partiel)"
+              }
+            },
+            {
+              "value": "armed_night",
+              "label": {
+                "en": "Armed night",
+                "fr": "Armé (nuit)"
+              }
+            },
+            {
+              "value": "armed_vacation",
+              "label": {
+                "en": "Armed vacation",
+                "fr": "Armé (vacances)"
+              }
+            }
           ]
         }
       ],
       "variables": [
         {
-          "key": "target",
+          "key": "area",
+          "type": "number",
+          "label": {
+            "en": "Area",
+            "fr": "Secteur"
+          }
+        },
+        {
+          "key": "mode",
           "type": "string",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" }
+          "label": {
+            "en": "Mode",
+            "fr": "Mode"
+          }
+        },
+        {
+          "key": "by_gladys",
+          "type": "boolean",
+          "label": {
+            "en": "Asked by Gladys",
+            "fr": "Demandé par Gladys"
+          }
+        }
+      ]
+    },
+    {
+      "key": "disarmed",
+      "label": {
+        "en": "ELK area disarmed",
+        "fr": "Secteur ELK désarmé"
+      },
+      "description": {
+        "en": "An area was disarmed (from Gladys, a keypad, a key fob or another app).",
+        "fr": "Un secteur a été désarmé (depuis Gladys, un clavier, une télécommande ou une autre application)."
+      },
+      "variables": [
+        {
+          "key": "area",
+          "type": "number",
+          "label": {
+            "en": "Area",
+            "fr": "Secteur"
+          }
+        },
+        {
+          "key": "by_gladys",
+          "type": "boolean",
+          "label": {
+            "en": "Asked by Gladys",
+            "fr": "Demandé par Gladys"
+          }
         }
       ]
     }
   ],
   "scene_actions": [
     {
-      "key": "identify_device",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
+      "key": "arm",
+      "label": {
+        "en": "Arm the ELK alarm",
+        "fr": "Armer l'alarme ELK"
+      },
       "description": {
-        "en": "Make a device signal itself (the demo light blinks).",
-        "fr": "Fait se signaler un appareil (la lampe de démonstration clignote)."
+        "en": "Arms an area, away, stay or night (a user code is needed).",
+        "fr": "Arme un secteur, en total, partiel ou nuit (un code utilisateur est nécessaire)."
       },
       "timeout_seconds": 15,
       "fields": [
         {
-          "key": "device",
+          "key": "area",
           "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
-        }
-      ],
-      "outputs": [
+          "label": {
+            "en": "Area",
+            "fr": "Secteur"
+          },
+          "required": false,
+          "default": "1",
+          "options": [
+            { "value": "1", "label": { "en": "1", "fr": "1" } },
+            { "value": "2", "label": { "en": "2", "fr": "2" } },
+            { "value": "3", "label": { "en": "3", "fr": "3" } },
+            { "value": "4", "label": { "en": "4", "fr": "4" } },
+            { "value": "5", "label": { "en": "5", "fr": "5" } },
+            { "value": "6", "label": { "en": "6", "fr": "6" } },
+            { "value": "7", "label": { "en": "7", "fr": "7" } },
+            { "value": "8", "label": { "en": "8", "fr": "8" } }
+          ]
+        },
         {
-          "key": "signalled",
-          "type": "boolean",
-          "label": { "en": "Device signalled", "fr": "Appareil signalé" }
+          "key": "mode",
+          "type": "select",
+          "label": {
+            "en": "Mode",
+            "fr": "Mode"
+          },
+          "required": false,
+          "default": "armed_away",
+          "options": [
+            {
+              "value": "armed_away",
+              "label": {
+                "en": "Armed away",
+                "fr": "Armé (total)"
+              }
+            },
+            {
+              "value": "armed_stay",
+              "label": {
+                "en": "Armed stay",
+                "fr": "Armé (partiel)"
+              }
+            },
+            {
+              "value": "armed_night",
+              "label": {
+                "en": "Armed night",
+                "fr": "Armé (nuit)"
+              }
+            }
+          ]
         }
       ]
-    }
-  ],
-  "widgets": [
+    },
     {
-      "key": "demo_status",
-      "label": { "en": "Demo status", "fr": "État de la démo" },
-      "description": {
-        "en": "Live temperature and plug power, plug connection and observed location.",
-        "fr": "Température et puissance en direct, connexion de la prise, position observée."
+      "key": "disarm",
+      "label": {
+        "en": "Disarm the ELK alarm",
+        "fr": "Désarmer l'alarme ELK"
       },
-      "icon": "activity",
-      "action_timeout_seconds": 15
+      "description": {
+        "en": "Disarms an area: off unless allowed in the configuration.",
+        "fr": "Désarme un secteur : désactivé sauf autorisation dans la configuration."
+      },
+      "timeout_seconds": 15,
+      "fields": [
+        {
+          "key": "area",
+          "type": "select",
+          "label": {
+            "en": "Area",
+            "fr": "Secteur"
+          },
+          "required": false,
+          "default": "1",
+          "options": [
+            { "value": "1", "label": { "en": "1", "fr": "1" } },
+            { "value": "2", "label": { "en": "2", "fr": "2" } },
+            { "value": "3", "label": { "en": "3", "fr": "3" } },
+            { "value": "4", "label": { "en": "4", "fr": "4" } },
+            { "value": "5", "label": { "en": "5", "fr": "5" } },
+            { "value": "6", "label": { "en": "6", "fr": "6" } },
+            { "value": "7", "label": { "en": "7", "fr": "7" } },
+            { "value": "8", "label": { "en": "8", "fr": "8" } }
+          ]
+        }
+      ]
     }
   ]
 }
