@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-10-23
+
 ### Fixed
 
 - An arm waiting for a disarm of its area to apply no longer delays the
@@ -84,5 +86,6 @@ the notes of the version's GitHub Release.
   the docs say TLS 1.0 is weaker and list every case where an arm is
   refused.
 
-[Unreleased]: https://github.com/LM1LC3N7/gladys-elk-m1/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/LM1LC3N7/gladys-elk-m1/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/LM1LC3N7/gladys-elk-m1/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/LM1LC3N7/gladys-elk-m1/releases/tag/v0.1.1
