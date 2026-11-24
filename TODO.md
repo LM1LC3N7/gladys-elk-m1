@@ -204,3 +204,7 @@ up to date at the end of every milestone.
   (`npx github:GladysAssistant/integration-store .`) cannot be run from the
   development agent (to be run by the main session, `validate.ps1`); never
   run against a real panel.
+
+## Next patch
+
+- Migration review minors: see `_lots/migration-reviews/w16-gladys-elk-m1-r1.md`.
