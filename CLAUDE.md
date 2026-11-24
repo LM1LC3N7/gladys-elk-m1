@@ -8,7 +8,8 @@ contributors.
 A Gladys Assistant **external integration**: a Node.js service (Node 22+, ESM,
 no build step) that runs in its own sandboxed Docker container and talks to
 Gladys through
-[`@gladysassistant/integration-sdk`](https://github.com/GladysAssistant/integration-sdk-js),
+[`@gladysassistant/integration-sdk`](https://github.com/GladysAssistant/integration-sdk-js)
+(v0.16),
 its only runtime dependency. It started from the official JavaScript template.
 It connects to the M1XEP Ethernet module of an ELK M1 alarm panel.
 
@@ -16,7 +17,7 @@ It connects to the M1XEP Ethernet module of an ELK M1 alarm panel.
 
 ```bash
 npm install
-npm test                                  # node --test, the built-in runner
+npm test                                  # node --test --test-timeout=60000
 node --test test/app.test.js              # one file
 node --test --test-name-pattern "arm"     # tests whose name matches
 npm run lint                              # ESLint
@@ -65,6 +66,13 @@ never logged.
 
 ## Rules
 
+- **Features follow the core model.** Every feature has a non-empty `name`, a
+  numeric `min` and `max` (0/0 for text), boolean `read_only` and
+  `has_feedback`: Gladys refuses it otherwise, and the SDK's fake Gladys
+  (0.16.1) too; `test/helpers/coreFeature.js` checks the panel, an
+  area, the five zone kinds, an output and a thermostat, in both units.
+  Devices carry `should_poll: false` (Gladys 5.3 polls a device with
+  `poll_frequency` unless it says so).
 - **External ids are forever.** Build them with
   `gladys.externalIds(type, platformId)`, `platformId` being the unique id the
   platform gives the device (here the numbers of the panel), never a label.

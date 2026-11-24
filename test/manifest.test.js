@@ -8,7 +8,17 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
-import { DEFAULTS, LANGUAGES } from '../src/config.js';
+import { createFakeGladys } from '@gladysassistant/integration-sdk/testing';
+import { DEFAULTS, LANGUAGES, normalizeConfig } from '../src/config.js';
+import {
+  AREA_FEATURES,
+  OUTPUT_FEATURES,
+  PANEL_FEATURES,
+  ZONE_FEATURES,
+  buildDevices,
+  thermostatFeatures,
+} from '../src/devices.js';
+import { assertCoreDevice } from './helpers/coreFeature.js';
 import {
   ACTIONS,
   ARM_MODES,
@@ -16,6 +26,7 @@ import {
   SCENE_ACTIONS,
   SCENE_TRIGGERS,
   TEMPERATURE_UNITS,
+  ZONE_KINDS,
 } from '../src/constants.js';
 import { ALARM_KINDS } from '../src/elk/protocol.js';
 
@@ -242,4 +253,33 @@ test('the trigger fields and variables are what the events carry', () => {
   assert.deepEqual(values(modes), [...ARM_MODES, 'armed_vacation']);
   const kinds = manifest.scene_triggers.find((t) => t.key === 'alarm_triggered').description.en;
   for (const kind of ALARM_KINDS) assert.match(kinds, new RegExp(kind));
+});
+
+test('every feature has a numeric min and max and the other core fields', () => {
+  const gladys = createFakeGladys({ selector: 'elk-m1' });
+  for (const temperature_unit of TEMPERATURE_UNITS) {
+    const config = normalizeConfig({
+      host: '192.168.1.80',
+      areas: '1',
+      zones: ZONE_KINDS.map((kind, i) => `${i + 1}:${kind}`).join(', '),
+      outputs: '1',
+      thermostats: '1',
+      temperature_unit,
+    });
+    const model = {
+      names: { area: new Map(), zone: new Map(), output: new Map(), thermostat: new Map() },
+    };
+    let features = 0;
+    for (const device of buildDevices(gladys, config, model, [])) {
+      features += assertCoreDevice(device, `${temperature_unit} ${device.external_id}`);
+    }
+    assert.equal(
+      features,
+      Object.keys(PANEL_FEATURES).length +
+        Object.keys(AREA_FEATURES).length +
+        ZONE_KINDS.length * (1 + Object.keys(ZONE_FEATURES).length) +
+        Object.keys(OUTPUT_FEATURES).length +
+        Object.keys(thermostatFeatures(temperature_unit)).length,
+    );
+  }
 });
